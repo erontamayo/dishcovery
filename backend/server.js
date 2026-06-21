@@ -31,11 +31,14 @@ app.use(express.urlencoded({ extended: true }));
 /* ========================
    CORS CONFIG
 ======================== */
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  process.env.FRONTEND_URL?.replace(/\/$/, ''), // strip trailing slash if present
+].filter(Boolean);
+
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ],
+  origin: allowedOrigins,
   credentials: true
 }));
 
@@ -47,11 +50,12 @@ app.options('*', cors());
 const MySQLStore = MySQLStoreFactory(session);
 
 const sessionStore = new MySQLStore({
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-  password: '', // 🔥 lagay mo password mo kung meron
-  database: 'dishcovery'
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'dishcovery',
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
 });
 
 /* ========================
@@ -65,8 +69,8 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: false,     // ⚠️ false for localhost
-    sameSite: 'lax',   // ⚠️ important for cross-origin
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
