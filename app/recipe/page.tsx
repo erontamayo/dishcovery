@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { ArrowLeft, MessageCircle, ChefHat, Clock, Users, Send, Loader2, CheckCircle2, Circle, Search } from 'lucide-react'
 import { sendChatMessage, getRecipeSteps, discoverRecipes, generateRecipeDetails } from '@/lib/openai'
 
@@ -36,7 +36,7 @@ interface RecipePageProps {
   onBack: () => void
 }
 
-export default function RecipePage() {
+function RecipePageContent() {
   const searchParams = useSearchParams()
   const [recipe, setRecipe] = useState<Recipe | null>(null)
   const [loading, setLoading] = useState(false)
@@ -831,5 +831,13 @@ loadSteps()
         </div>
       </div>
     </div>
+  )
+}
+
+export default function RecipePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[#44624a]" /></div>}>
+      <RecipePageContent />
+    </Suspense>
   )
 }
