@@ -12,7 +12,7 @@ import reflectionsRoutes from './routes/reflections.js';
 import adminRoutes from './routes/admin.js';
 import aiRoutes from './routes/ai.js';
 
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
