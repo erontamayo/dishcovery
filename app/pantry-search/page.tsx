@@ -141,39 +141,52 @@ export default function PantrySearchPage() {
   // AI SEARCH
   // ---------------------------------------
   const aiSearchRecipes = async (query: string) => {
-    if (!query.trim()) {
-      setFilteredDishes(dishes)
-      return
-    }
+  if (!query.trim()) {
+    setFilteredDishes(dishes)
+    return
+  }
 
-    setIsSearching(true)
+  setIsSearching(true)
 
-    try {
-      const aiSuggestions = await discoverRecipes(query)
+  try {
+    const aiSuggestions = await discoverRecipes(query)
 
-      const mapped = aiSuggestions.map(
-        (recipe: any, index: number) => ({
-          id: Date.now() + index,
+    // Try to match AI suggestions to real DB dishes first
+    const matched: Dish[] = []
+    const unmatched: Dish[] = []
+
+    aiSuggestions.forEach((recipe: any) => {
+      const found = dishes.find(d =>
+        d.name.toLowerCase().includes(recipe.title?.toLowerCase()) ||
+        recipe.title?.toLowerCase().includes(d.name.toLowerCase())
+      )
+      if (found) {
+        matched.push(found) // use real dish with real image
+      } else {
+        unmatched.push({
+          id: Date.now() + Math.random(),
           name: recipe.title,
           description: recipe.description,
-          image_url: recipe.image_url || '',
+          image_url: '', // no image for AI-only results
           difficulty_level: recipe.difficulty,
           prep_time: recipe.time,
           cook_time: recipe.time,
           servings: recipe.servings,
           category: recipe.category,
         })
-      )
+      }
+    })
 
-      setFilteredDishes(mapped)
+    // Show matched (with images) first, then unmatched
+    setFilteredDishes([...matched, ...unmatched])
 
-    } catch (err) {
-      console.error('AI search failed:', err)
-      filterDishes([query])
-    } finally {
-      setIsSearching(false)
-    }
+  } catch (err) {
+    console.error('AI search failed:', err)
+    filterDishes([query])
+  } finally {
+    setIsSearching(false)
   }
+}
 
   // ---------------------------------------
   // FALLBACK SEARCH
