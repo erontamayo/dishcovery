@@ -57,9 +57,14 @@ export default function RecipePage() {
         const data = await getDishById(Number(id))
         setDish(data)
 
-        if (data.recipe) {
+       if (data.recipe) {
           try {
-            setIngredients(JSON.parse(data.recipe.ingredients_json || '[]'))
+            const raw = data.recipe.ingredients_json
+            setIngredients(
+              Array.isArray(raw) ? raw
+              : typeof raw === 'string' ? JSON.parse(raw || '[]')
+              : []
+            )
             const rawInstructions = data.recipe.instructions || ''
             setInstructions(
               rawInstructions
@@ -70,6 +75,7 @@ export default function RecipePage() {
           } catch (e) {
             console.error('Error parsing recipe data:', e)
           }
+        }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load recipe')
