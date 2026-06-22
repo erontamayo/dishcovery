@@ -167,7 +167,7 @@ export default function PantrySearchPage() {
           id: Date.now() + Math.random(),
           name: recipe.title,
           description: recipe.description,
-          image_url: '', // no image for AI-only results
+         image_url: `https://source.unsplash.com/600x400/?${encodeURIComponent(recipe.title)},food`,
           difficulty_level: recipe.difficulty,
           prep_time: recipe.time,
           cook_time: recipe.time,
