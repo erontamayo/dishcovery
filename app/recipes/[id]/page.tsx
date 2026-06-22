@@ -57,8 +57,9 @@ export default function RecipePage() {
         const data = await getDishById(Number(id))
         setDish(data)
 
-       if (data.recipe) {
+        if (data.recipe) {
           try {
+            // mysql2 auto-parses JSON columns into objects, so handle both string and object
             const raw = data.recipe.ingredients_json
             setIngredients(
               Array.isArray(raw) ? raw
@@ -75,7 +76,6 @@ export default function RecipePage() {
           } catch (e) {
             console.error('Error parsing recipe data:', e)
           }
-        }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load recipe')
