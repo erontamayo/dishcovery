@@ -125,25 +125,10 @@ export async function createReflection(
   notes: string,
   rating: number
 ) {
-  const response = await fetch('http://localhost:3001/api/reflections', {
+  return apiCall('/reflections', {
     method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      recipe_title: recipeTitle,
-      notes,
-      rating,
-    }),
-  })
-
-  if (!response.ok) {
-    const data = await response.json().catch(() => null)
-    throw new Error(data?.error || 'Failed to create reflection')
-  }
-
-  return response.json()
+    body: JSON.stringify({ recipe_title: recipeTitle, notes, rating }),
+  });
 }
 
 export async function updateReflection(id: string | number, notes: string, rating?: number) {
