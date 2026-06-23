@@ -664,18 +664,25 @@ export default function PantrySearchPage() {
                     className="group cursor-pointer bg-white/90 backdrop-blur rounded-[28px] border border-[#ece7df] shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 p-7"
                   >
 
-                    {dish.image_url && dish.image_url.startsWith('http') && (
-  <div className="relative h-48 w-full overflow-hidden rounded-2xl mb-5">
+                    <div className="relative h-48 w-full overflow-hidden rounded-2xl mb-5">
+  {dish.image_url && dish.image_url.startsWith('http') ? (
     <img
       src={dish.image_url}
       alt={dish.name}
       width={600}
       height={192}
       className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+      onError={(e) => {
+        (e.target as HTMLImageElement).style.display = 'none';
+        (e.target as HTMLImageElement).parentElement!.classList.add('bg-gradient-to-br', 'from-[#44624a]', 'to-[#8fbc8f]');
+      }}
     />
-  </div>
-)}
+  ) : (
+    <div className="w-full h-full bg-gradient-to-br from-[#44624a] to-[#8fbc8f] flex items-center justify-center">
+      <span className="text-6xl">🍽️</span>
+    </div>
+  )}
+</div>
 
                     {!dish.image_url && (
                       <div className="h-2 w-24 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 mb-5" />
