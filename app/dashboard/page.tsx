@@ -315,87 +315,36 @@ const getDifficultyStyle = (level: string) => {
       </div>
 
       {/* RIGHT SIDE */}
-      <div className="flex items-center gap-4">
-        
+<div className="flex items-center gap-4">
 
-        <span className="hidden md:block text-sm text-zinc-300">
-          Welcome,{" "}
-          <button
-  className="lg:hidden text-white"
-  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
->
-  {mobileMenuOpen ? <X /> : <Menu />}
-</button>
-          <span className="font-semibold text-white">
-            {user?.name}
-          </span>
-        </span>
+  {/* MOBILE MENU BUTTON */}
+  <button
+    className="lg:hidden text-white"
+    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+  >
+    {mobileMenuOpen ? <X /> : <Menu />}
+  </button>
 
-        <button
-          onClick={handleLogout}
-          className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-5 py-2 rounded-full transition"
-        >
-          Logout
-        </button>
-      </div>
+  {/* WELCOME TEXT (desktop only) */}
+  <span className="hidden md:block text-sm text-zinc-300">
+    Welcome,{" "}
+    <span className="font-semibold text-white">
+      {user?.name}
+    </span>
+  </span>
+
+  <button
+    onClick={handleLogout}
+    className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-5 py-2 rounded-full transition"
+  >
+    Logout
+  </button>
+
+</div>
 
     </div>
   </div>
-  {mobileMenuOpen && (
-  <div className="lg:hidden fixed inset-0 z-50">
-    
-    {/* BACKDROP */}
-    <div
-      className="absolute inset-0 bg-black/60"
-      onClick={() => setMobileMenuOpen(false)}
-    />
-
-    {/* DRAWER */}
-    <div className="absolute right-0 top-0 h-full w-72 bg-black text-white shadow-2xl p-6 flex flex-col">
-
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-8">
-        <span className="text-lg font-black tracking-wide">
-          MENU
-        </span>
-
-        <button onClick={() => setMobileMenuOpen(false)}>
-          <X className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* USER INFO */}
-      <div className="mb-6">
-        <p className="text-sm text-zinc-400">Signed in as</p>
-        <p className="font-semibold">{user?.name}</p>
-      </div>
-
-      {/* NAV LINKS */}
-      <nav className="flex flex-col gap-4">
-        {FEATURES.map((feature) => (
-          <Link
-            key={feature.title}
-            href={feature.href}
-            onClick={() => setMobileMenuOpen(false)}
-            className="text-sm font-medium hover:text-yellow-400 transition"
-          >
-            {feature.title}
-          </Link>
-        ))}
-      </nav>
-
-      {/* FOOTER ACTIONS */}
-      <div className="mt-auto pt-6 border-t border-white/10">
-        <button
-          onClick={handleLogout}
-          className="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-xl transition"
-        >
-          Logout
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+  
 </nav>
 
       {/* HERO SECTION */}
