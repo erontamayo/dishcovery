@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { getDishById } from '@/lib/api'
 import Image from 'next/image'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 import {
   Clock3,
   Users,
@@ -128,45 +129,7 @@ export default function RecipePage() {
   return (
     <div className="min-h-screen bg-[#f8f5ef] overflow-hidden">
 
-      {/* NAVBAR */}
-      <nav className="bg-black/90 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-20">
-
-            <Link href="/dashboard" className="flex items-center gap-3 group">
-              <Image
-                src="/updated-dishcovery-logo.png"
-                alt="Dishcovery Logo"
-                width={42}
-                height={42}
-                className="group-hover:rotate-6 transition duration-300"
-              />
-              <span className="text-2xl font-black tracking-wide text-white">
-                DISHCOVERY
-              </span>
-            </Link>
-
-            <div className="hidden lg:flex items-center gap-10 text-sm font-semibold uppercase tracking-wide text-white">
-              {[
-                ['Dashboard', '/dashboard'],
-                ['Recipes', '/recipe'],
-                ['Pantry', '/pantry-search'],
-                ['Techniques', '/techniques'],
-                ['Allergen & Diet', '/filters'],
-                ['Journal', '/reflection-log']
-              ].map(([label, href]) => (
-                <Link
-                  key={label}
-                  href={href}
-                  className="relative hover:text-yellow-400 transition duration-300 after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-yellow-400 after:transition-all hover:after:w-full"
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar activePage="Recipes" />
 
       {/* HERO */}
       <section className="relative h-[720px] overflow-hidden">
