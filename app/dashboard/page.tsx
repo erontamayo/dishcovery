@@ -321,61 +321,61 @@ const getDifficultyStyle = (level: string) => {
 
     </div>
   </div>
-
-  {/* MOBILE MENU DRAWER */}
-  {mobileMenuOpen && (
-    <div className="lg:hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md">
-
-      {/* DRAWER HEADER */}
-      <div className="flex items-center justify-between px-6 h-20 border-b border-white/10">
-        <span className="text-white font-black text-lg">MENU</span>
-        <button onClick={() => setMobileMenuOpen(false)} className="text-white">
-          <X size={28} />
-        </button>
-      </div>
-
-      {/* WELCOME */}
-      <div className="px-6 pt-6">
-        <p className="text-white/60 text-sm">Welcome back,</p>
-        <p className="text-white font-black text-xl">{user?.name}</p>
-      </div>
-
-      {/* FEATURE LINKS */}
-      <div className="px-6 py-8 space-y-6">
-        {FEATURES.map((feature) => {
-          const Icon = feature.icon
-          return (
-            <Link
-              key={feature.title}
-              href={feature.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-start gap-4 text-white"
-            >
-              <div className="bg-white/10 p-3 rounded-xl">
-                <Icon className="w-5 h-5 text-yellow-400" />
-              </div>
-              <div>
-                <p className="font-bold text-lg">{feature.title}</p>
-                <p className="text-sm text-white/60">{feature.description}</p>
-              </div>
-            </Link>
-          )
-        })}
-      </div>
-
-      {/* LOGOUT BUTTON */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-white/10">
-        <button
-          onClick={handleLogout}
-          className="w-full bg-yellow-400 text-black font-bold py-3 rounded-xl"
-        >
-          Logout
-        </button>
-      </div>
-
-    </div>
-  )}
 </nav>
+
+{/* MOBILE MENU DRAWER - OUTSIDE NAV */}
+{mobileMenuOpen && (
+  <div className="lg:hidden fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col">
+
+    {/* DRAWER HEADER */}
+    <div className="flex items-center justify-between px-6 h-20 border-b border-white/10 shrink-0">
+      <span className="text-white font-black text-lg">MENU</span>
+      <button onClick={() => setMobileMenuOpen(false)} className="text-white">
+        <X size={28} />
+      </button>
+    </div>
+
+    {/* WELCOME */}
+    <div className="px-6 pt-6 shrink-0">
+      <p className="text-white/60 text-sm">Welcome back,</p>
+      <p className="text-white font-black text-xl">{user?.name}</p>
+    </div>
+
+    {/* FEATURE LINKS */}
+    <div className="px-6 py-8 space-y-6 flex-1 overflow-y-auto">
+      {FEATURES.map((feature) => {
+        const Icon = feature.icon
+        return (
+          <Link
+            key={feature.title}
+            href={feature.href}
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-start gap-4 text-white"
+          >
+            <div className="bg-white/10 p-3 rounded-xl shrink-0">
+              <Icon className="w-5 h-5 text-yellow-400" />
+            </div>
+            <div>
+              <p className="font-bold text-lg">{feature.title}</p>
+              <p className="text-sm text-white/60">{feature.description}</p>
+            </div>
+          </Link>
+        )
+      })}
+    </div>
+
+    {/* LOGOUT BUTTON */}
+    <div className="p-6 border-t border-white/10 shrink-0">
+      <button
+        onClick={handleLogout}
+        className="w-full bg-yellow-400 text-black font-bold py-3 rounded-xl"
+      >
+        Logout
+      </button>
+    </div>
+
+  </div>
+)}
 
       {/* HERO SECTION */}
 {/* HERO SECTION */}
