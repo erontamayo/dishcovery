@@ -12,6 +12,7 @@ import {
   addPracticeMinutes
 } from '@/lib/progress'
 import { usePathname } from 'next/navigation'
+import Navbar from '@/components/Navbar'
 
 interface Recipe {
   id: number
@@ -50,70 +51,48 @@ function RecipePageContent() {
   const recipeStartTime = useRef<number | null>(null)
   const pathname = usePathname()
 
-  // Recipe Search State
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const resultsRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
-  if (searchResults.length > 0) {
-    resultsRef.current?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    })
-  }
-}, [searchResults])
+    if (searchResults.length > 0) {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [searchResults])
 
   useEffect(() => {
-  const query = searchParams.get('q')
+    const query = searchParams.get('q')
+    if (query) setSearchQuery(query)
+  }, [searchParams])
 
-  if (query) {
-    setSearchQuery(query)
-  }
-}, [searchParams])
+  useEffect(() => {
+    const query = searchParams.get('q')
+    if (query && query.trim().length >= 2) handleSearchFromQuery(query)
+  }, [searchParams])
 
-// AUTO SEARCH WHEN ARRIVING FROM DASHBOARD
-useEffect(() => {
-  const query = searchParams.get('q')
-
-  if (query && query.trim().length >= 2) {
-    handleSearchFromQuery(query)
-  }
-}, [searchParams])
-
-const handleSearchFromQuery = async (query: string) => {
-  if (isSearching) return
-
-  setIsSearching(true)
-  setSearchResults([])
-
-  try {
-    const aiSuggestions = await discoverRecipes(query)
-
-    const enrichedResults = await Promise.all(
-      aiSuggestions.map(async (r) => {
-        return {
-          ...r,
-          image_url: r.image_url || null
-        }
-      })
-    )
-
-    setSearchResults(enrichedResults)
-  } catch (error) {
-    console.error('Search error:', error)
+  const handleSearchFromQuery = async (query: string) => {
+    if (isSearching) return
+    setIsSearching(true)
     setSearchResults([])
-  } finally {
-    setIsSearching(false)
+    try {
+      const aiSuggestions = await discoverRecipes(query)
+      const enrichedResults = await Promise.all(
+        aiSuggestions.map(async (r) => ({ ...r, image_url: r.image_url || null }))
+      )
+      setSearchResults(enrichedResults)
+    } catch (error) {
+      console.error('Search error:', error)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
   }
-}
 
-  // Load recipe steps using AI
   useEffect(() => {
     async function loadSteps() {
       if (!recipe) return
-
       try {
         const generatedSteps = await getRecipeSteps(recipe)
         setSteps(generatedSteps)
@@ -128,95 +107,71 @@ const handleSearchFromQuery = async (query: string) => {
         ])
       }
     }
-    
 
     if (recipe) {
-
       recipeStartTime.current = Date.now()
-
-      // Initialize chat for new recipe
-setChatMessages([
-  {
-    role: 'assistant',
-    content: `Hi, I am Dishi! Your cooking assistant for ${recipe.name}. Ask me anything about ingredients, techniques, substitutions, or cooking tips!`
-  }
-])
-
-loadSteps()
+      setChatMessages([{
+        role: 'assistant',
+        content: `Hi, I am Dishi! Your cooking assistant for ${recipe.name}. Ask me anything about ingredients, techniques, substitutions, or cooking tips!`
+      }])
+      loadSteps()
     }
   }, [recipe])
 
-  // Auto-scroll chat
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatMessages])
 
-  // Recipe Search - AI-POWERED DISCOVERY
   const handleSearch = async () => {
-  if (searchQuery.trim().length < 2 || isSearching) return
-
-  setIsSearching(true)
-  setSearchResults([])
-
-  try {
-    const aiSuggestions = await discoverRecipes(searchQuery)
-
-    // optional: enrich results (if you actually want image generation later)
-    const enrichedResults = await Promise.all(
-      aiSuggestions.map(async (r) => {
-        return {
-          ...r,
-          image_url: r.image_url || null
-        }
-      })
-    )
-
-    setSearchResults(enrichedResults)
-  } catch (error) {
-    console.error('Search error:', error)
+    if (searchQuery.trim().length < 2 || isSearching) return
+    setIsSearching(true)
     setSearchResults([])
-  } finally {
-    setIsSearching(false)
+    try {
+      const aiSuggestions = await discoverRecipes(searchQuery)
+      const enrichedResults = await Promise.all(
+        aiSuggestions.map(async (r) => ({ ...r, image_url: r.image_url || null }))
+      )
+      setSearchResults(enrichedResults)
+    } catch (error) {
+      console.error('Search error:', error)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
   }
-}
 
   const switchToRecipe = async (recipeData: any) => {
-  try {
-    setLoading(true)
-
-    const detailedRecipe = await generateRecipeDetails(recipeData.title)
-
-    setRecipe({
-      id: recipeData.id,
-      name: detailedRecipe.name || recipeData.title,
-      description: detailedRecipe.description || recipeData.description,
-      image_url: recipeData.image_url,
-      difficulty: detailedRecipe.difficulty || recipeData.difficulty,
-      prep_time: detailedRecipe.prep_time,
-      cook_time: detailedRecipe.cook_time,
-      servings: detailedRecipe.servings,
-      category: detailedRecipe.category,
-      ingredients: detailedRecipe.ingredients,
-      steps: detailedRecipe.steps
-    })
-
-    setSearchResults([])
-    setSearchQuery('')
-  } catch (error) {
-    console.error('Error loading recipe:', error)
-  } finally {
-    setLoading(false)
+    try {
+      setLoading(true)
+      const detailedRecipe = await generateRecipeDetails(recipeData.title)
+      setRecipe({
+        id: recipeData.id,
+        name: detailedRecipe.name || recipeData.title,
+        description: detailedRecipe.description || recipeData.description,
+        image_url: recipeData.image_url,
+        difficulty: detailedRecipe.difficulty || recipeData.difficulty,
+        prep_time: detailedRecipe.prep_time,
+        cook_time: detailedRecipe.cook_time,
+        servings: detailedRecipe.servings,
+        category: detailedRecipe.category,
+        ingredients: detailedRecipe.ingredients,
+        steps: detailedRecipe.steps
+      })
+      setSearchResults([])
+      setSearchQuery('')
+    } catch (error) {
+      console.error('Error loading recipe:', error)
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
   const handleSendMessage = async () => {
     if (!userInput.trim() || isChatLoading || !recipe) return
-
     const userMessage: Message = { role: 'user', content: userInput }
     setChatMessages(prev => [...prev, userMessage])
     setUserInput('')
     setIsChatLoading(true)
-
     try {
       const response = await sendChatMessage([...chatMessages, userMessage], recipe)
       setChatMessages(prev => [...prev, { role: 'assistant', content: response }])
@@ -231,33 +186,21 @@ loadSteps()
   }
 
   const toggleStepCompletion = (index: number) => {
-  const newCompleted = new Set(completedSteps)
-
-  if (newCompleted.has(index)) {
-    newCompleted.delete(index)
-  } else {
-    newCompleted.add(index)
-  }
-
-  setCompletedSteps(newCompleted)
-
-  // RECIPE FINISHED
-  if (
-    steps.length > 0 &&
-    newCompleted.size === steps.length
-  ) {
-    addRecipeLearned()
-
-    if (recipeStartTime.current) {
-      const minutesSpent =
-        (Date.now() - recipeStartTime.current) /
-        1000 /
-        60
-
-      addPracticeMinutes(minutesSpent)
+    const newCompleted = new Set(completedSteps)
+    if (newCompleted.has(index)) {
+      newCompleted.delete(index)
+    } else {
+      newCompleted.add(index)
+    }
+    setCompletedSteps(newCompleted)
+    if (steps.length > 0 && newCompleted.size === steps.length) {
+      addRecipeLearned()
+      if (recipeStartTime.current) {
+        const minutesSpent = (Date.now() - recipeStartTime.current) / 1000 / 60
+        addPracticeMinutes(minutesSpent)
+      }
     }
   }
-}
 
   const difficultyColors = {
     Beginner: 'bg-green-100 text-green-700',
@@ -276,378 +219,136 @@ loadSteps()
     )
   }
 
-  // SEARCH INTERFACE - shown when no recipe is loaded
+  // SEARCH VIEW
   if (!recipe) {
-  return (
-    <div className="min-h-screen bg-[#f8f5ef]">
-
-      {/* NAVBAR */}
-<nav className="bg-black/90 backdrop-blur-md sticky top-0 z-50 border-b border-white/10 text-white">
-  <div className="max-w-7xl mx-auto px-6">
-    <div className="flex items-center justify-between h-20">
-
-      {/* LOGO */}
-      <Link href="/dashboard" className="flex items-center gap-3 group">
-        <Image
-          src="/updated-dishcovery-logo.png"
-          alt="Dishcovery Logo"
-          width={42}
-          height={42}
-          className="group-hover:rotate-6 transition duration-300"
-        />
-
-        <span className="text-2xl font-black tracking-wide">
-          DISHCOVERY
-        </span>
-      </Link>
-
-      {/* NAV LINKS */}
-      <div className="hidden lg:flex items-center gap-10 text-sm font-semibold uppercase tracking-wide text-white">
-
-  {[
-    ['Dashboard', '/dashboard'],
-    ['Recipes', '/recipe'],
-    ['Pantry', '/pantry-search'],
-    ['Techniques', '/techniques'],
-    ['Allergen & Diet', '/filters'],
-  ].map(([label, href]) => {
-    const isActive = pathname === href
-
     return (
-      <Link
-        key={href}
-        href={href}
-        className={`relative transition duration-300 hover:text-yellow-400
-          after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:bg-yellow-400 after:transition-all
-          ${isActive ? 'text-yellow-400 after:w-full' : 'after:w-0 hover:after:w-full'}
-        `}
-      >
-        {label}
-      </Link>
-    )
-  })}
+      <div className="min-h-screen bg-[#f8f5ef]">
 
-  <Link
-    href="/reflection-log"
-    className={`relative transition duration-300 hover:text-yellow-400
-      after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:bg-yellow-400 after:transition-all
-      ${pathname === '/reflection-log' ? 'text-yellow-400 after:w-full' : 'after:w-0 hover:after:w-full'}
-    `}
-  >
-    Journal
-  </Link>
+        <Navbar activePage="Recipes" />
 
-</div>
-    </div>
-  </div>
-</nav>
+        {/* HERO */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#44624a] via-[#5d7a63] to-[#2f3c33]" />
+          <div className="absolute right-0 top-0 text-[350px] opacity-10 leading-none">🍜</div>
+          <div className="relative max-w-7xl mx-auto px-6 py-24">
+            <div className="max-w-3xl">
+              <p className="uppercase tracking-[0.35em] text-white/60 text-sm mb-5">
+                Dishi's Recipe Discovery
+              </p>
+              <h1 className="text-6xl font-black text-white leading-tight mb-6">
+                Discover Recipes <br />Like a Chef
+              </h1>
+              <p className="text-xl text-white/80 leading-relaxed mb-10">
+                Search for dishes, explore cuisines, and get step-by-step Dishi-powered cooking guidance.
+              </p>
 
-      {/* HERO */}
-      <div className="relative overflow-hidden">
-
-        <div className="absolute inset-0 bg-gradient-to-br from-[#44624a] via-[#5d7a63] to-[#2f3c33]" />
-
-        <div className="absolute right-0 top-0 text-[350px] opacity-10 leading-none">
-          🍜
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-6 py-24">
-
-          <div className="max-w-3xl">
-
-            <p className="uppercase tracking-[0.35em] text-white/60 text-sm mb-5">
-              Dishi's Recipe Discovery
-            </p>
-
-            <h1 className="text-6xl font-black text-white leading-tight mb-6">
-              Discover Recipes <br />
-              Like a Chef
-            </h1>
-
-            <p className="text-xl text-white/80 leading-relaxed mb-10">
-              Search for dishes, explore cuisines, and get step-by-step Dishi-powered cooking guidance.
-            </p>
-
-            {/* SEARCH */}
-            <div className="bg-white rounded-[30px] p-3 shadow-2xl flex gap-3">
-
-              <div className="flex-1 relative">
-
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
-
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  placeholder="Search recipes... (ramen, pasta, curry, desserts)"
-                  className="
-                    w-full
-                    pl-14
-                    pr-4
-                    py-5
-                    rounded-2xl
-                    bg-[#f8f5ef]
-                    text-lg
-                    focus:outline-none
-                  "
-                />
-
-              </div>
-
-              <button
-                onClick={handleSearch}
-                disabled={isSearching || !searchQuery.trim()}
-                className="
-                  px-8
-                  rounded-2xl
-                  bg-[#44624a]
-                  hover:bg-black
-                  text-white
-                  font-bold
-                  transition-all
-                  duration-300
-                "
-              >
-                {isSearching ? (
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                ) : (
-                  'Search'
-                )}
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-
-      {/* RESULTS */}
-      <div ref={resultsRef} className="max-w-7xl mx-auto px-6 py-14">
-
-        {searchResults.length > 0 && (
-
-          <>
-            <div className="flex items-center justify-between mb-8">
-
-              <div>
-                <h2 className="text-4xl font-black text-[#2f3c33] mb-2">
-                  Recipe Results
-                </h2>
-
-                <p className="text-gray-500">
-                  Click any recipe to open full cooking mode.
-                </p>
-              </div>
-
-            </div>
-
-            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-
-              {searchResults.map((result) => (
-
-                <div
-                  key={result.id}
-                  onClick={() => switchToRecipe(result)}
-                  className="
-                    group
-                    bg-white
-                    rounded-[30px]
-                    overflow-hidden
-                    border border-[#ece7df]
-                    shadow-md
-                    hover:shadow-2xl
-                    hover:-translate-y-2
-                    transition-all
-                    duration-300
-                    cursor-pointer
-                  "
-                >
-
-                  {/* IMAGE */}
-                  <div className="relative h-60 overflow-hidden">
-
-                    {result.image_url ? (
-                      <img
-                        src={result.image_url}
-                        alt={result.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-[#44624a] to-[#2f3c33] flex items-center justify-center">
-                        <ChefHat className="w-20 h-20 text-white/30" />
-                      </div>
-                    )}
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-                    <div className="absolute bottom-5 left-5">
-
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold backdrop-blur ${
-                        difficultyColors[result.difficulty as keyof typeof difficultyColors]
-                      }`}>
-                        {result.difficulty}
-                      </span>
-
-                    </div>
-
-                  </div>
-
-                  {/* CONTENT */}
-                  <div className="p-7">
-
-                    <div className="flex items-center gap-2 mb-3">
-
-                      <div className="w-2 h-2 rounded-full bg-[#44624a]" />
-
-                      <span className="uppercase text-xs tracking-wide text-[#44624a] font-bold">
-                        {result.category}
-                      </span>
-
-                    </div>
-
-                    <h3 className="text-2xl font-black text-[#2f3c33] mb-3">
-                      {result.title}
-                    </h3>
-
-                    <p className="text-gray-600 line-clamp-3 leading-relaxed mb-6">
-                      {result.description}
-                    </p>
-
-                    <div className="flex items-center justify-between">
-
-                      <div className="flex gap-5 text-sm text-gray-500">
-
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {result.time}
-                        </div>
-
-                        <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          {result.servings}
-                        </div>
-
-                      </div>
-
-                      <div className="
-                        w-11 h-11 rounded-full
-                        bg-[#44624a]
-                        text-white
-                        flex items-center justify-center
-                        group-hover:translate-x-1
-                        transition
-                      ">
-                        →
-                      </div>
-
-                    </div>
-
-                  </div>
-
+              <div className="bg-white rounded-[30px] p-3 shadow-2xl flex gap-3">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    placeholder="Search recipes... (ramen, pasta, curry, desserts)"
+                    className="w-full pl-14 pr-4 py-5 rounded-2xl bg-[#f8f5ef] text-lg focus:outline-none"
+                  />
                 </div>
-
-              ))}
-
+                <button
+                  onClick={handleSearch}
+                  disabled={isSearching || !searchQuery.trim()}
+                  className="px-8 rounded-2xl bg-[#44624a] hover:bg-black text-white font-bold transition-all duration-300"
+                >
+                  {isSearching ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Search'}
+                </button>
+              </div>
             </div>
-          </>
-        )}
+          </div>
+        </div>
 
+        {/* RESULTS */}
+        <div ref={resultsRef} className="max-w-7xl mx-auto px-6 py-14">
+          {searchResults.length > 0 && (
+            <>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h2 className="text-4xl font-black text-[#2f3c33] mb-2">Recipe Results</h2>
+                  <p className="text-gray-500">Click any recipe to open full cooking mode.</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+                {searchResults.map((result) => (
+                  <div
+                    key={result.id}
+                    onClick={() => switchToRecipe(result)}
+                    className="group bg-white rounded-[30px] overflow-hidden border border-[#ece7df] shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer"
+                  >
+                    <div className="relative h-60 overflow-hidden">
+                      {result.image_url ? (
+                        <img src={result.image_url} alt={result.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-[#44624a] to-[#2f3c33] flex items-center justify-center">
+                          <ChefHat className="w-20 h-20 text-white/30" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      <div className="absolute bottom-5 left-5">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold backdrop-blur ${difficultyColors[result.difficulty as keyof typeof difficultyColors]}`}>
+                          {result.difficulty}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-7">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-2 h-2 rounded-full bg-[#44624a]" />
+                        <span className="uppercase text-xs tracking-wide text-[#44624a] font-bold">{result.category}</span>
+                      </div>
+                      <h3 className="text-2xl font-black text-[#2f3c33] mb-3">{result.title}</h3>
+                      <p className="text-gray-600 line-clamp-3 leading-relaxed mb-6">{result.description}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-5 text-sm text-gray-500">
+                          <div className="flex items-center gap-1"><Clock className="w-4 h-4" />{result.time}</div>
+                          <div className="flex items-center gap-1"><Users className="w-4 h-4" />{result.servings}</div>
+                        </div>
+                        <div className="w-11 h-11 rounded-full bg-[#44624a] text-white flex items-center justify-center group-hover:translate-x-1 transition">→</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </div>
-  )
-}
+    )
+  }
 
-  // RECIPE DETAIL VIEW - shown when recipe is loaded
+  // RECIPE DETAIL VIEW
   const totalTime = recipe.prep_time || recipe.cook_time || '30 min'
 
   return (
-  <div className="min-h-screen bg-[#f8f5ef]">
-      {/* NAVBAR */}
-<nav className="bg-black/90 backdrop-blur-md sticky top-0 z-50 border-b border-white/10 text-white">
-  <div className="max-w-7xl mx-auto px-6">
-    <div className="flex items-center justify-between h-20">
+    <div className="min-h-screen bg-[#f8f5ef]">
 
-      {/* LOGO */}
-      <Link href="/dashboard" className="flex items-center gap-3 group">
-        <Image
-          src="/updated-dishcovery-logo.png"
-          alt="Dishcovery Logo"
-          width={42}
-          height={42}
-          className="group-hover:rotate-6 transition duration-300"
-        />
-
-        <span className="text-2xl font-black tracking-wide">
-          DISHCOVERY
-        </span>
-      </Link>
-
-      {/* NAV LINKS */}
-      <div className="hidden lg:flex items-center gap-10 text-sm font-semibold uppercase tracking-wide text-white">
-
-  {[
-    ['Dashboard', '/dashboard'],
-    ['Recipes', '/recipe'],
-    ['Pantry', '/pantry-search'],
-    ['Techniques', '/techniques'],
-    ['Allergen & Diet', '/filters'],
-  ].map(([label, href]) => {
-    const isActive = pathname === href
-
-    return (
-      <Link
-        key={href}
-        href={href}
-        className={`relative transition duration-300 hover:text-yellow-400
-          after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:bg-yellow-400 after:transition-all
-          ${isActive ? 'text-yellow-400 after:w-full' : 'after:w-0 hover:after:w-full'}
-        `}
-      >
-        {label}
-      </Link>
-    )
-  })}
-
-  <Link
-    href="/reflection-log"
-    className={`relative transition duration-300 hover:text-yellow-400
-      after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:bg-yellow-400 after:transition-all
-      ${pathname === '/reflection-log' ? 'text-yellow-400 after:w-full' : 'after:w-0 hover:after:w-full'}
-    `}
-  >
-    Journal
-  </Link>
-
-</div>
-    </div>
-  </div>
-</nav>
+      <Navbar activePage="Recipes" />
 
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="grid lg:grid-cols-3 gap-6">
-          
-          {/* LEFT COLUMN: Recipe Details & Steps */}
+
+          {/* LEFT COLUMN */}
           <div className="lg:col-span-2 space-y-6">
-            
-            {/* Recipe Header */}
+
             <div className="bg-white rounded-[32px] overflow-hidden shadow-2xl border border-[#ece7df]">
               <div className="relative h-[500px]">
                 {recipe.image_url ? (
-                  <img
-                    src={recipe.image_url}
-                    alt={recipe.name}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={recipe.image_url} alt={recipe.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-[#44624a] to-[#2d4a35] flex items-center justify-center">
                     <ChefHat className="w-24 h-24 text-white/30" />
                   </div>
                 )}
-                
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                
                 <div className="absolute bottom-6 left-6 right-6 text-white">
                   <div className="flex items-center gap-2 mb-3">
                     {recipe.difficulty && (
@@ -655,39 +356,24 @@ loadSteps()
                         {recipe.difficulty}
                       </span>
                     )}
-                    {recipe.category && (
-                      <span className="text-white/90">{recipe.category}</span>
-                    )}
+                    {recipe.category && <span className="text-white/90">{recipe.category}</span>}
                   </div>
-                  
                   <h1 className="text-5xl font-black mb-3 leading-tight">{recipe.name}</h1>
-                  
                   <div className="flex items-center gap-6 text-white/90">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5" />
-                      <span>{totalTime}</span>
-                    </div>
+                    <div className="flex items-center gap-2"><Clock className="w-5 h-5" /><span>{totalTime}</span></div>
                     {recipe.servings && (
-                      <div className="flex items-center gap-2">
-                        <Users className="w-5 h-5" />
-                        <span>{recipe.servings} servings</span>
-                      </div>
+                      <div className="flex items-center gap-2"><Users className="w-5 h-5" /><span>{recipe.servings} servings</span></div>
                     )}
                   </div>
                 </div>
               </div>
-              
-              <div className="p-6">
-                <p className="text-gray-700">{recipe.description}</p>
-              </div>
+              <div className="p-6"><p className="text-gray-700">{recipe.description}</p></div>
             </div>
 
-            {/* Ingredients */}
             {recipe.ingredients && recipe.ingredients.length > 0 && (
               <div className="bg-white rounded-[30px] p-8 shadow-xl border border-[#ece7df]">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <ChefHat className="w-6 h-6 text-[#44624a]" />
-                  Ingredients
+                  <ChefHat className="w-6 h-6 text-[#44624a]" />Ingredients
                 </h2>
                 <ul className="space-y-2">
                   {recipe.ingredients.map((ingredient, index) => (
@@ -700,10 +386,8 @@ loadSteps()
               </div>
             )}
 
-            {/* Step-by-Step Instructions */}
             <div className="bg-white rounded-xl p-6 shadow-lg">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Step-by-Step Instructions</h2>
-              
               {steps.length === 0 ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-8 h-8 text-[#44624a] animate-spin" />
@@ -715,32 +399,20 @@ loadSteps()
                     <div
                       key={index}
                       className={`flex gap-4 p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                        completedSteps.has(index)
-                          ? 'border-green-500 bg-green-50'
-                          : currentStep === index
-                          ? 'border-[#44624a] bg-[#44624a]/5'
-                          : 'border-gray-200 hover:border-gray-300'
+                        completedSteps.has(index) ? 'border-green-500 bg-green-50'
+                        : currentStep === index ? 'border-[#44624a] bg-[#44624a]/5'
+                        : 'border-gray-200 hover:border-gray-300'
                       }`}
-                      onClick={() => {
-                        setCurrentStep(index)
-                        toggleStepCompletion(index)
-                      }}
+                      onClick={() => { setCurrentStep(index); toggleStepCompletion(index) }}
                     >
                       <div className="flex-shrink-0 mt-1">
-                        {completedSteps.has(index) ? (
-                          <CheckCircle2 className="w-6 h-6 text-green-600" />
-                        ) : (
-                          <Circle className="w-6 h-6 text-gray-400" />
-                        )}
+                        {completedSteps.has(index) ? <CheckCircle2 className="w-6 h-6 text-green-600" /> : <Circle className="w-6 h-6 text-gray-400" />}
                       </div>
-                      
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="font-bold text-[#44624a]">Step {index + 1}</span>
                         </div>
-                        <p className={`${completedSteps.has(index) ? 'text-gray-600 line-through' : 'text-gray-700'}`}>
-                          {step}
-                        </p>
+                        <p className={completedSteps.has(index) ? 'text-gray-600 line-through' : 'text-gray-700'}>{step}</p>
                       </div>
                     </div>
                   ))}
@@ -749,20 +421,9 @@ loadSteps()
             </div>
           </div>
 
-          {/* RIGHT COLUMN: AI Chat Assistant */}
+          {/* RIGHT COLUMN - CHAT */}
           <div className="lg:col-span-1">
-            <div className="
-              bg-white
-              rounded-[30px]
-              shadow-2xl
-              border border-[#ece7df]
-              h-[calc(100vh-8rem)]
-              sticky top-24
-              flex flex-col
-              overflow-hidden
-            ">
-              
-              {/* Chat Header */}
+            <div className="bg-white rounded-[30px] shadow-2xl border border-[#ece7df] h-[calc(100vh-8rem)] sticky top-24 flex flex-col overflow-hidden">
               <div className="p-4 border-b border-gray-200">
                 <div className="flex items-center gap-2">
                   <div className="bg-[#44624a] p-2 rounded-lg">
@@ -775,25 +436,14 @@ loadSteps()
                 </div>
               </div>
 
-              {/* Chat Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {chatMessages.map((message, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[85%] rounded-lg px-4 py-3 ${
-                        message.role === 'user'
-                          ? 'bg-[#44624a] text-white'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
+                  <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[85%] rounded-lg px-4 py-3 ${message.role === 'user' ? 'bg-[#44624a] text-white' : 'bg-gray-100 text-gray-800'}`}>
                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     </div>
                   </div>
                 ))}
-                
                 {isChatLoading && (
                   <div className="flex justify-start">
                     <div className="bg-gray-100 rounded-lg px-4 py-3">
@@ -801,11 +451,9 @@ loadSteps()
                     </div>
                   </div>
                 )}
-                
                 <div ref={chatEndRef} />
               </div>
 
-              {/* Chat Input */}
               <div className="p-4 border-t border-gray-200">
                 <div className="flex gap-2">
                   <input
@@ -828,6 +476,7 @@ loadSteps()
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
