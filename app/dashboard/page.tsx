@@ -7,7 +7,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import {
   Search,
-  Clock,'use client'
+  Clock,
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
