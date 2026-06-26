@@ -359,7 +359,6 @@ const getDifficultyStyle = (level: string) => {
 </div>
 
     </div>
-  </div>
   
 </nav>
 
