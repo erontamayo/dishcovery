@@ -275,6 +275,7 @@ const getDifficultyStyle = (level: string) => {
       </Link>
 
       {/* NAV LINKS */}
+      {/* NAV LINKS */}
 <nav className="hidden lg:flex flex-1 justify-center gap-10 text-sm font-semibold uppercase tracking-wide text-white relative z-50">
   {FEATURES.map((feature) => (
     <div key={feature.title} className="relative group">
@@ -291,6 +292,21 @@ const getDifficultyStyle = (level: string) => {
     </div>
   ))}
 </nav>
+
+        {FEATURES.map((feature) => (
+  <div key={feature.title} className="relative group">
+
+    <Link
+      href={feature.href}
+      className="relative hover:text-yellow-400 transition duration-300
+      after:absolute after:left-0 after:-bottom-1 after:h-[2px]
+      after:w-0 after:bg-yellow-400 after:transition-all
+      hover:after:w-full"
+    >
+      {feature.title}
+    </Link>
+
+    {/* TOOLTIP */}
     <div
       className="
         absolute left-1/2 -translate-x-1/2 top-10
