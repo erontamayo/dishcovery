@@ -268,133 +268,113 @@ const getDifficultyStyle = (level: string) => {
           height={42}
           className="group-hover:rotate-6 transition duration-300"
         />
-
         <span className="text-2xl font-black tracking-wide text-white">
           DISHCOVERY
         </span>
       </Link>
 
-      {/* NAV LINKS */}
+      {/* NAV LINKS - DESKTOP */}
       <div className="hidden lg:flex items-center gap-10 text-sm font-semibold uppercase tracking-wide text-white">
-
         {FEATURES.map((feature) => (
-  <div key={feature.title} className="relative group">
-
-    <Link
-      href={feature.href}
-      className="relative hover:text-yellow-400 transition duration-300
-      after:absolute after:left-0 after:-bottom-1 after:h-[2px]
-      after:w-0 after:bg-yellow-400 after:transition-all
-      hover:after:w-full"
-    >
-      {feature.title}
-    </Link>
-
-    {/* TOOLTIP */}
-    <div
-      className="
-        absolute left-1/2 -translate-x-1/2 top-10
-        opacity-0 invisible
-        group-hover:opacity-100 group-hover:visible
-        transition-all duration-300
-        bg-[#1f1f1f]
-        text-white text-xs
-        px-4 py-2
-        rounded-lg
-        shadow-xl
-        whitespace-nowrap
-        z-50
-      "
-    >
-      {feature.description}
-    </div>
-
-  </div>
-))}
-
+          <div key={feature.title} className="relative group">
+            <Link
+              href={feature.href}
+              className="relative hover:text-yellow-400 transition duration-300
+              after:absolute after:left-0 after:-bottom-1 after:h-[2px]
+              after:w-0 after:bg-yellow-400 after:transition-all
+              hover:after:w-full"
+            >
+              {feature.title}
+            </Link>
+            <div className="absolute left-1/2 -translate-x-1/2 top-10
+              opacity-0 invisible group-hover:opacity-100 group-hover:visible
+              transition-all duration-300 bg-[#1f1f1f] text-white text-xs
+              px-4 py-2 rounded-lg shadow-xl whitespace-nowrap z-50">
+              {feature.description}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* RIGHT SIDE */}
       <div className="flex items-center gap-4">
-        
-
         <span className="hidden md:block text-sm text-zinc-300">
           Welcome,{" "}
-          <button
-  className="lg:hidden text-white"
-  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
->
-  {mobileMenuOpen ? <X /> : <Menu />}
-</button>
-          <span className="font-semibold text-white">
-            {user?.name}
-          </span>
+          <span className="font-semibold text-white">{user?.name}</span>
         </span>
 
         <button
           onClick={handleLogout}
-          className="bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-5 py-2 rounded-full transition"
+          className="hidden lg:block bg-yellow-400 hover:bg-yellow-300 text-black font-semibold px-5 py-2 rounded-full transition"
+        >
+          Logout
+        </button>
+
+        {/* HAMBURGER - MOBILE ONLY */}
+        <button
+          className="lg:hidden text-white"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  {/* MOBILE MENU DRAWER */}
+  {mobileMenuOpen && (
+    <div className="lg:hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md">
+
+      {/* DRAWER HEADER */}
+      <div className="flex items-center justify-between px-6 h-20 border-b border-white/10">
+        <span className="text-white font-black text-lg">MENU</span>
+        <button onClick={() => setMobileMenuOpen(false)} className="text-white">
+          <X size={28} />
+        </button>
+      </div>
+
+      {/* WELCOME */}
+      <div className="px-6 pt-6">
+        <p className="text-white/60 text-sm">Welcome back,</p>
+        <p className="text-white font-black text-xl">{user?.name}</p>
+      </div>
+
+      {/* FEATURE LINKS */}
+      <div className="px-6 py-8 space-y-6">
+        {FEATURES.map((feature) => {
+          const Icon = feature.icon
+          return (
+            <Link
+              key={feature.title}
+              href={feature.href}
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-start gap-4 text-white"
+            >
+              <div className="bg-white/10 p-3 rounded-xl">
+                <Icon className="w-5 h-5 text-yellow-400" />
+              </div>
+              <div>
+                <p className="font-bold text-lg">{feature.title}</p>
+                <p className="text-sm text-white/60">{feature.description}</p>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
+
+      {/* LOGOUT BUTTON */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-white/10">
+        <button
+          onClick={handleLogout}
+          className="w-full bg-yellow-400 text-black font-bold py-3 rounded-xl"
         >
           Logout
         </button>
       </div>
 
     </div>
-  </div>
-  {mobileMenuOpen && (
-  <div className="lg:hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md">
-
-    {/* HEADER INSIDE DRAWER */}
-    <div className="flex items-center justify-between px-6 h-20 border-b border-white/10">
-      <span className="text-white font-black text-lg">
-        MENU
-      </span>
-
-      <button
-        onClick={() => setMobileMenuOpen(false)}
-        className="text-white"
-      >
-        <X size={28} />
-      </button>
-    </div>
-
-    {/* FEATURES */}
-    <div className="px-6 py-8 space-y-6">
-      {FEATURES.map((feature) => {
-        const Icon = feature.icon
-
-        return (
-          <Link
-            key={feature.title}
-            href={feature.href}
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-start gap-4 text-white"
-          >
-            <div className="bg-white/10 p-3 rounded-xl">
-              <Icon className="w-5 h-5 text-yellow-400" />
-            </div>
-
-            <div>
-              <p className="font-bold text-lg">{feature.title}</p>
-              <p className="text-sm text-white/60">{feature.description}</p>
-            </div>
-          </Link>
-        )
-      })}
-    </div>
-
-    {/* FOOTER ACTION */}
-    <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-white/10">
-      <button
-        onClick={handleLogout}
-        className="w-full bg-yellow-400 text-black font-bold py-3 rounded-xl"
-      >
-        Logout
-      </button>
-    </div>
-
-  </div>
-)}
+  )}
 </nav>
 
       {/* HERO SECTION */}
