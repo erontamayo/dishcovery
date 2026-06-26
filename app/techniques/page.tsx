@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { getTechniques, getCurrentUser } from '@/lib/api'
 import Link from 'next/link'
 import Image from 'next/image'
+import Navbar from '@/components/Navbar'
 import {
   addTechniqueMastered,
   getProgress
@@ -98,71 +99,7 @@ else if (score >= 20) skillLevel = 'Novice'
  return (
   <div className="min-h-screen bg-[#f8f5ef]">
 
-    {/* NAVBAR */}
-    <nav className="bg-black/90 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-20">
-
-          {/* LOGO */}
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 group"
-          >
-            <Image
-              src="/updated-dishcovery-logo.png"
-              alt="Dishcovery Logo"
-              width={42}
-              height={42}
-              className="group-hover:rotate-6 transition duration-300"
-            />
-
-            <span className="text-2xl font-black tracking-wide text-white">
-              DISHCOVERY
-            </span>
-          </Link>
-
-          {/* NAV LINKS */}
-          <div className="hidden lg:flex items-center gap-10 text-sm font-semibold uppercase tracking-wide text-white">
-
-            {[
-              ['Dashboard', '/dashboard'],
-              ['Recipes', '/recipe'],
-              ['Pantry', '/pantry-search'],
-            ].map(([label, href]) => (
-              <Link
-                key={label}
-                href={href}
-                className="relative hover:text-yellow-400 transition duration-300 after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-yellow-400 after:transition-all hover:after:w-full"
-              >
-                {label}
-              </Link>
-            ))}
-
-            <Link
-              href="/techniques"
-              className="text-yellow-400 relative after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-full after:bg-yellow-400"
-            >
-              Techniques
-            </Link>
-
-            <Link
-              href="/filters"
-              className="relative hover:text-yellow-400 transition duration-300 after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-yellow-400 after:transition-all hover:after:w-full"
-            >
-              Allergen & Diet
-            </Link>
-
-            <Link
-              href="/reflection-log"
-              className="relative hover:text-yellow-400 transition duration-300 after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-yellow-400 after:transition-all hover:after:w-full"
-            >
-              Journal
-            </Link>
-
-          </div>
-        </div>
-      </div>
-    </nav>
+    <Navbar activePage="Techniques" />
 
     <main className="max-w-7xl mx-auto px-6 py-10">
 
