@@ -275,22 +275,22 @@ const getDifficultyStyle = (level: string) => {
       </Link>
 
       {/* NAV LINKS */}
-      <div className="hidden lg:flex items-center gap-10 text-sm font-semibold uppercase tracking-wide text-white">
+<nav className="hidden lg:flex flex-1 justify-center gap-10 text-sm font-semibold uppercase tracking-wide text-white relative z-50">
+  {FEATURES.map((feature) => (
+    <div key={feature.title} className="relative group">
+      <Link
+        href={feature.href}
+        className="hover:text-yellow-400 transition relative after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-yellow-400 hover:after:w-full after:transition-all"
+      >
+        {feature.title}
+      </Link>
 
-        {FEATURES.map((feature) => (
-  <div key={feature.title} className="relative group">
-
-    <Link
-      href={feature.href}
-      className="relative hover:text-yellow-400 transition duration-300
-      after:absolute after:left-0 after:-bottom-1 after:h-[2px]
-      after:w-0 after:bg-yellow-400 after:transition-all
-      hover:after:w-full"
-    >
-      {feature.title}
-    </Link>
-
-    {/* TOOLTIP */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition bg-[#1f1f1f] text-xs px-4 py-2 rounded-lg shadow-xl whitespace-nowrap">
+        {feature.description}
+      </div>
+    </div>
+  ))}
+</nav>
     <div
       className="
         absolute left-1/2 -translate-x-1/2 top-10
